@@ -1,8 +1,5 @@
 class Board {
 
-  constructor() {
-    this.boardArray = this.createBoard()
-  }
 
  createBoard() {
   const boardArray = []
@@ -16,21 +13,21 @@ class Board {
   return(boardArray)
  }
 
- renderBoard() {
+ renderBoard(board) {
    console.log(`
         0 1 2
        -------
-    0 |${this.printCoordinate(0, 0)} ${this.printCoordinate(1,0)} ${this.printCoordinate(2,0)}
-    1 |${this.printCoordinate(0,1)} ${this.printCoordinate(1,1)} ${this.printCoordinate(2,1)}
-    2 |${this.printCoordinate(0,2)} ${this.printCoordinate(1,2)} ${this.printCoordinate(2,2)}
+    0 | ${this.printCoordinate(board, 0, 0)} ${this.printCoordinate(board, 1,0)} ${this.printCoordinate(board, 2,0)}
+    1 | ${this.printCoordinate(board, 0,1)} ${this.printCoordinate(board, 1,1)} ${this.printCoordinate(board, 2,1)}
+    2 | ${this.printCoordinate(board, 0,2)} ${this.printCoordinate(board, 1,2)} ${this.printCoordinate(board, 2,2)}
    `)
  }
 
- printCoordinate(x, y) {
-   if(this.boardArray[y][x] === null) {
+ printCoordinate(board, x, y) {
+   if(board[y][x] === null) {
      return ' '
    } else {
-     return this.boardArray[y][x]
+     return board[y][x]
    }
  }
 }
@@ -44,8 +41,13 @@ class Player {
   }
 }
 
+class Game {
+
+}
+
 
 board = new Board;
+gameboard = board.createBoard()
+board.renderBoard(gameboard)
 player = new Player;
-board.renderBoard()
-player.takeTurn(board.boardArray, 0, 0, 'X')
+board.renderBoard(player.takeTurn(gameboard, 0, 0, 'X'))
