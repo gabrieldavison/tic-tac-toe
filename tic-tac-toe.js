@@ -1,3 +1,4 @@
+//Readline required to get input from command line
 const readline = require("readline");
 const rl = readline.createInterface({
   input: process.stdin,
@@ -39,6 +40,7 @@ class Board {
    `);
   }
 
+  //Prints coordinate or empty space if coordinate is null
   printCoordinate(board, x, y) {
     if (board[y][x] === null) {
       return " ";
@@ -61,18 +63,19 @@ class Player {
 }
 
 class Game {
-  getMove(board, callback) {
+  //Prompts player for coordinates in command line
+  getMove(boardState, callback) {
     let xcoord;
     let ycoord;
     rl.question(`Enter X coordinate: `, (answer) => {
       xcoord = answer;
       rl.question("Enter Y coordinate: ", (answer) => {
         ycoord = answer;
-        callback([xcoord, ycoord]);
+        callback(boardState, [xcoord, ycoord]);
       });
     });
   }
-
+  //Check if mood is legal
   checkValid(board, coordinates) {
     if (
       coordinates[0] < 0 ||
@@ -127,46 +130,45 @@ function startGame() {
   player1 = new Player("Player 1", "X");
   player2 = new Player("Player 2", "O");
   game = new Game();
-  let boardState = board.createBoard();
+  // let boardState = board.createBoard();
   let currentPlayer = player1;
-  board.renderBoard(boardState);
+  board.renderBoard(board.createBoard());
 
-  function getInput() {
+  function getInput(boardState = board.createBoard()) {
     console.log(`${currentPlayer.name}'s turn.`);
     game.getMove(boardState, checkCoordinates);
   }
-  function checkCoordinates(coordinates) {
+
+  function checkCoordinates(boardState, coordinates) {
     if (game.checkValid(boardState, coordinates) === false) {
       console.log("Invalid move, please enter a valid set of coordinates");
       return game.getMove(boardState, checkCoordinates);
     } else {
-      updateBoardState(coordinates);
+      updateBoardState(boardState, coordinates);
     }
   }
 
-  function updateBoardState(coordinates) {
+  function updateBoardState(boardState, coordinates) {
     const newState = currentPlayer.takeTurn(
       boardState,
       coordinates,
       currentPlayer.counter
     );
-    console.log(newState);
     board.renderBoard(newState);
     checkWinner(newState);
   }
 
-  function checkWinner(board) {
-    if (game.checkWinner(board)) {
+  function checkWinner(boardState) {
+    if (game.checkWinner(boardState)) {
       console.log(`${currentPlayer.name} is the winner!`);
-    } else if (game.checkDraw(board)) {
+    } else if (game.checkDraw(boardState)) {
       console.log("The game is a draw.");
     } else {
-      boardState = board;
       //Switch current player
       currentPlayer === player1
         ? (currentPlayer = player2)
         : (currentPlayer = player1);
-      getInput();
+      getInput(boardState);
     }
   }
 
