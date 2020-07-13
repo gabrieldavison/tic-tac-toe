@@ -6,6 +6,7 @@ const rl = readline.createInterface({
 });
 
 class Board {
+  //Returns an array for 3x3 game board
   createBoard() {
     const boardArray = [];
     for (let y = 0; y < 3; y++) {
@@ -18,6 +19,7 @@ class Board {
     return boardArray;
   }
 
+  //Prints the board to console
   renderBoard(board) {
     console.log(`
         0 1 2
@@ -68,15 +70,31 @@ class Game {
     let xcoord;
     let ycoord;
     rl.question(`Enter X coordinate: `, (answer) => {
-      xcoord = answer;
-      rl.question("Enter Y coordinate: ", (answer) => {
-        ycoord = answer;
-        callback(boardState, [xcoord, ycoord]);
-      });
+      if (isNumber(answer)) {
+        xcoord = answer;
+        rl.question("Enter Y coordinate: ", (answer) => {
+          if (isNumber(answer)) {
+            ycoord = answer;
+            callback(boardState, [xcoord, ycoord]);
+          } else {
+            console.log("COORDINATE MUST BE A NUMBER");
+            this.getMove(boardState, callback);
+          }
+        });
+      } else {
+        console.log("COORDINATE MUST BE A NUMBER");
+        this.getMove(boardState, callback);
+      }
     });
+    //Checks to see if string can be parsed into a valid number
+    function isNumber(number) {
+      return !isNaN(parseInt(number)) && isFinite(number);
+    }
   }
-  //Check if mood is legal
+
+  //Check if move is legal
   checkValid(board, coordinates) {
+    //Check coordinates are in the range of board
     if (
       coordinates[0] < 0 ||
       coordinates[0] > 2 ||
@@ -84,12 +102,14 @@ class Game {
       coordinates[1] > 2
     ) {
       return false;
+      //Checks that coordinate is empty
     } else if (board[coordinates[1]][coordinates[0]] !== null) {
       return false;
     } else {
       return true;
     }
   }
+
   //Checks to see if game has been won. Returns null if no winner.
   checkWinner(board) {
     let winner = false;
@@ -125,20 +145,24 @@ class Game {
   }
 }
 
-function startGame() {
+(function startGame() {
+  //Creates instances of the objects needed for a game
   board = new Board();
   player1 = new Player("Player 1", "X");
   player2 = new Player("Player 2", "O");
   game = new Game();
-  // let boardState = board.createBoard();
+
   let currentPlayer = player1;
   board.renderBoard(board.createBoard());
 
+  //Gets player input then calls checkCoordinates
   function getInput(boardState = board.createBoard()) {
     console.log(`${currentPlayer.name}'s turn.`);
+    //checkCoordinates is passed as a callback because getting user input from CLI happens asynchronously
     game.getMove(boardState, checkCoordinates);
   }
 
+  //Checks players move is valid then calls updateBoardState
   function checkCoordinates(boardState, coordinates) {
     if (game.checkValid(boardState, coordinates) === false) {
       console.log("Invalid move, please enter a valid set of coordinates");
@@ -148,6 +172,7 @@ function startGame() {
     }
   }
 
+  //Updates the board then calls checkWinner
   function updateBoardState(boardState, coordinates) {
     const newState = currentPlayer.takeTurn(
       boardState,
@@ -158,6 +183,7 @@ function startGame() {
     checkWinner(newState);
   }
 
+  //Checks to see if the game has been won/is a draw
   function checkWinner(boardState) {
     if (game.checkWinner(boardState)) {
       console.log(`${currentPlayer.name} is the winner!`);
@@ -168,22 +194,11 @@ function startGame() {
       currentPlayer === player1
         ? (currentPlayer = player2)
         : (currentPlayer = player1);
+      //Restart game loop
       getInput(boardState);
     }
   }
-
   getInput();
-}
+})();
 
-const winBoard = [
-  [["O"], [null], [null]],
-  [[null], ["O"], [null]],
-  [[null], [null], ["O"]],
-];
-const drawBoard = [
-  [["O"], ["X"], ["O"]],
-  [["X"], ["O"], ["X"]],
-  [["X"], ["O"], ["X"]],
-];
-
-startGame();
+module.exports = Board;
